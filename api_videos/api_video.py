@@ -18,6 +18,7 @@ class VideoList(generics.ListAPIView):
     api_keys = ['AIzaSyAUsp-ZS_d1N0llAv5Dl-XBOg27Nid6PH8', 'AIzaSyAUsp-ZS_d1N0llAv5Dl-XBOg27Nid6PH8']
     
     def get_queryset(self):
+        #To access new api key if previous one exhausts
         for api_key in self.api_keys:
             try:
                 youtube = build('youtube', 'v3', developerKey=api_key)
@@ -44,7 +45,7 @@ class SearchApi(generics.ListAPIView):
     def get_queryset(self):
         query_param = self.request.query_params.get('q', '')
         you_tube_videos = YouTubeVideo.objects.filter(Q(title__icontains=query_param) | Q(description__icontains=query_param)).order_by('-published_at')
-
+        # To allow partial search 
         if len(query_param.split()) > 1:
             query_params = query_param.split()
             for param in query_params:
