@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+ networks:
+      - djangoconnect
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - redis
+      - worker
+      - beat
+    links:
+      - db:db
+    networks:
+      - djangoconnect
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: milind12
+      ports:
+       - "5432:5432"
+      networks:
+      - djangoconnect
+  redis:
+    image: redis
+  worker:
+    build: .
+    command: celery -A fampay_api worker -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+  beat:
+    build: .
+    command: celery -A fampay_api beat -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
